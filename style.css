@@ -1,0 +1,42 @@
+.wrapper {
+    margin: 0 auto;
+    width: 800px;
+    background-color: aqua;
+    
+}
+
+.inner {
+    width: 800px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form__title {
+    font-weight: 700;
+    font-size: 25px;
+}
+
+.form__textarea {
+    width: 500px;
+    margin-bottom: 10px;
+}
+
+.form__send-btn {
+    padding: 5px;
+    width: 100px;
+    margin-bottom: 10px;
+}
+
+.form__cancel-btn {
+    padding: 5px;
+    width: 100px;
+    margin-bottom: 10px;
+}
+
+.none {
+    display: none;
+}
