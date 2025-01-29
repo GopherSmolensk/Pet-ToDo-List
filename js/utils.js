@@ -58,4 +58,52 @@ function renderTasks(tasks) {
         `
         document.querySelector('.output').insertAdjacentHTML('beforeend',item)
     })
+
+    activationDrag()
+}
+
+function activationDrag() {
+    const tasks = [...document.querySelectorAll('.task')]
+
+    tasks.forEach(item => {
+        item.addEventListener("dragstart", () => {
+            setTimeout(() => item.classList.add('dragging'), 0)
+        })
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging')
+            if (tasks.length > 1) {
+                savePositionTask()
+            }
+        })
+    })
+}
+
+function savePositionTask() {
+    const arrayTasksLocalStorage = getTasksLocalStorage()
+    const tasks = [...document.querySelectorAll('.task')]
+
+    tasks.forEach((item, i) => {
+        const id = Number(item.dataset.taskId)
+        const index = arrayTasksLocalStorage.findIndex(value => value.id === id)
+        if (index !== -1) {
+            arrayTasksLocalStorage[index].position = i
+        }
+    })
+
+    setTasksLocalStorage(arrayTasksLocalStorage)
+    updateListTask()
+}
+
+export function initSortableList(event) {
+    event.preventDefault()
+
+    const output = document.querySelector('.output')
+    const draggingItem = document.querySelector('.dragging')
+    let sibling = [...output.querySelectorAll('.task:not(.dragging)')]
+
+    let nextSibling = sibling.find(sibling => {
+        return event.clientY <= sibling.offsetTop + sibling.offsetHeight / 2
+    })
+
+    output.insertBefore(draggingItem, nextSibling)
 }

@@ -5,6 +5,7 @@ import {
     setTasksLocalStorage, 
     generateUniqueId,
     updateListTask,
+    initSortableList,
      } from './utils.js'
 
 const form = document.querySelector('.form')
@@ -20,6 +21,10 @@ updateListTask()
 
 // все слушатели событий
 form.addEventListener('submit', sendTask)
+buttonCancel.addEventListener('click', resetSendForm)
+output.addEventListener('dragover', initSortableList)
+output.addEventListener("dragenter", event => event.preventDefault())
+
 
 output.addEventListener('click', event => {
     const taskElement = event.target.closest('.task__btns')
@@ -48,6 +53,11 @@ function sendTask(event) {
             return alert('Поле не должно быть пустым!')
         }
 
+        if (isEditTask) {
+            saveEditedTask(task)
+            return
+        }
+
         const arrayTasksLocalStorage = getTasksLocalStorage();
         arrayTasksLocalStorage.push({
             id: generateUniqueId(),
@@ -72,4 +82,87 @@ function doneTask(event) {
     if (index === -1) {
         return alert ('Такая задача не найдена!!!')
     }
+
+    if (!arrayTasksLocalStorage[index].done && arrayTasksLocalStorage[index].pinned) {
+        arrayTasksLocalStorage[index].pinned = false
+    }
+
+    if (arrayTasksLocalStorage[index].done) {
+        arrayTasksLocalStorage[index].done = false
+    } else {
+        arrayTasksLocalStorage[index].done = true
+    }
+
+    setTasksLocalStorage(arrayTasksLocalStorage)
+    updateListTask()
+}
+
+function pinnedTask(event) {
+    const task = event.target.closest('.task')
+    const id = Number(task.dataset.taskId)
+
+    const arrayTasksLocalStorage = getTasksLocalStorage()
+    const index = arrayTasksLocalStorage.findIndex(task => task.id === id)
+
+    if (index === -1) {
+        return alert('Такая задача не найдена!')
+    }
+
+    if (!arrayTasksLocalStorage[index].pinned && arrayTasksLocalStorage[index].done) {
+        return alert('Чтобы закрепить задачу, сначала уберите отметку о выполнении!')
+    }
+
+    if (arrayTasksLocalStorage[index].pinned) {
+        arrayTasksLocalStorage[index].pinned = false
+    } else {
+        arrayTasksLocalStorage[index].pinned = true
+    }
+
+    setTasksLocalStorage(arrayTasksLocalStorage)
+    updateListTask()
+}
+
+function delTask(event) {
+    const task = event.target.closest('.task')
+    const id = Number(task.dataset.taskId)
+
+    const arrayTasksLocalStorage = getTasksLocalStorage()
+    const newTasksArray = arrayTasksLocalStorage.filter(task => task.id !== id)
+    setTasksLocalStorage(newTasksArray)
+    updateListTask()
+}
+
+function editTask(event) {
+    const task = event.target.closest('.task')
+    const text = task.querySelector('.task__text')
+    editId = Number(task.dataset.taskId)
+
+
+    textareaForm.value = text.textContent
+    isEditTask = true
+    buttonSendForm.textContent = 'Сохранить'
+    buttonCancel.classList.remove('none')
+    form.scrollIntoView({behavior: 'smooth'})
+}
+
+function saveEditedTask(task) {
+    const arrayTasksLocalStorage = getTasksLocalStorage()
+    const editedTaskIndex = arrayTasksLocalStorage.findIndex(task => task.id === editId)
+
+    if (editedTaskIndex !== -1) {
+        arrayTasksLocalStorage[editedTaskIndex].task = task
+        setTasksLocalStorage(arrayTasksLocalStorage)
+        updateListTask()
+    } else {
+        alert('Такая задача не найдена!!!')
+    }
+    resetSendForm()
+}
+
+function resetSendForm() {
+    editId = null
+    isEditTask = false
+    buttonCancel.classList.add('none')
+    buttonSendForm.textContent = 'Добавить'
+    form.reset()
 }
